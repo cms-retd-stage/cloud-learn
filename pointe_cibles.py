@@ -218,7 +218,6 @@ if __name__ == '__main__':
     
     
     '''
-    
     lats = viirs["pix_lat"]
     lons = viirs["pix_lon"]
     tm = viirs["pix_tm"]

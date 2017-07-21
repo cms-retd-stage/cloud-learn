@@ -2,7 +2,7 @@
 '''
 Created on 13 juin 2016
 
-@author: delatailler
+@author: delatailler; almeidamanceroi
 '''
 
 
@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import time
 
 from sklearn.metrics import classification_report
 from sklearn import svm
@@ -45,7 +46,7 @@ def modif_code_nuage(viirs):
     viirs_nuage['code'][clair]=0
     viirs_nuage['code'][fract]=19
     viirs_nuage['code'][nuage]=2
-    
+  
     return viirs_nuage
 
 
@@ -72,28 +73,27 @@ def creation_TrainTest(viirs_data,viirs_tm,ratio):
     ne pas utiliser pour Drawmap(1)
     """
     print 'Creation Train/Test'
-    n=ratio*int(len(viirs_data))
+    n=int(ratio*len(viirs_data))
     
-    viirs_data=viirs_data.iloc[np.random.permutation(len(viirs_data))]
-    viirs_data=viirs_data.reset_index(drop=True)
+    viirs_data=viirs_data.iloc[np.random.permutation(len(viirs_data))] #mélange les lignes du dataframe
+    viirs_data=viirs_data.reset_index(drop=True) #réinitialise les indices sans créer une nouvelle colonne
     
     lon=viirs_data['pix_lon']
     lat=viirs_data['pix_lat']
     viirs_data=viirs_data.drop(['pix_lon','pix_lat'],1)
     
-    viirs_target=viirs_data['code']
+    viirs_target=viirs_data['code'] #on garde le code qui est déjà de 1 a 20
     viirs_data=viirs_data.drop('code',1)
     
-    X_train=viirs_data.iloc[:int(n)]
-    Y_train=viirs_target.iloc[:int(n)]
+    X_train=viirs_data.iloc[:n]
+    Y_train=viirs_target.iloc[:n]
     
-    X_test=viirs_data.iloc[int(n):]
-    Y_test=viirs_target.iloc[int(n):]
+    X_test=viirs_data.iloc[n:]
+    Y_test=viirs_target.iloc[n:]
     
-    
-    lon=lon.iloc[int(n):]
-    lat=lat.iloc[int(n):]
-    tm=viirs_tm.iloc[int(n):]
+    lon=lon.iloc[n:] #on garde les lat et lon que pour les donnees test
+    lat=lat.iloc[n:]
+    tm=viirs_tm.iloc[n:] #idem pour tm
     print 'Train/Test cree'
     return X_train,X_test,Y_train,Y_test,lon,lat,tm
 
@@ -383,14 +383,12 @@ def model_tri_nuage_simple_jour(X):
                 X[allObs[i]+allObs[j]+'DAKKA']=X[allObs[i]]-X[allObs[j]]
                 dataset=np.append(dataset,allObs[i]+allObs[j]+'DAKKA')
     
-   
-    
     #'B14_15','B16_15','SP10_11','Obs_108','Obs_120','Obs_87','Obs_13' best
     data=X[dataset]
     data[['pix_lat','pix_lon','code']]=X[['pix_lat','pix_lon','code']]
     return data,tm,dataset
-    
-    
+
+
 def model_tri_clair_simple_jour(X):
     tm=X['pix_tm']
     X['SP5_10']=(X.Obs_06-X.Obs_16)/(X.Obs_06+X.Obs_16) #classif neige
@@ -406,7 +404,6 @@ def model_tri_clair_simple_jour(X):
     #draw3D(viirs=X, xs='SP4_7', ys='Obs_108', zs='pix_tm', code='code')
     plt.show()
     
-    
     dataset=['SP5_11','SP4_7','pix_tm','Obs_108']
     #'SP4_7','pix_tm','Obs_108 met ombre et sol froid en neige
     #'SP5_11','SP4_7','pix_tm','Obs_108' met ombre en neige
@@ -418,9 +415,7 @@ def model_tri_clair_simple_jour(X):
             if j>i:
                 X[allObs[i]+allObs[j]+'DAKKA']=X[allObs[i]]-X[allObs[j]]
                 dataset=np.append(dataset,allObs[i]+allObs[j]+'DAKKA')
-    
    '''
-    
     data=X[dataset]
     data[['pix_lat','pix_lon','code']]=X[['pix_lat','pix_lon','code']]
     return data,tm,dataset
@@ -465,8 +460,6 @@ def model_tri_clair_simple_nuit(X):
     X['SP15_12']=100*(X.Obs_108-X.Obs_37)/(X.Obs_108+X.Obs_37)
     
     
-    
-    
     #X.plot(kind='scatter',x='Obs_108',y='SP4_7',c='code')
     #radviz(X[['pix_tm','SP4_7','Obs_108','code']], 'code')
     #draw3D(viirs=X, xs='pix_tm', ys='sst_clim', zs='Obs_87', code='code')
@@ -478,36 +471,37 @@ def model_tri_clair_simple_nuit(X):
     return data,tm,dataset
 
 """
----------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
 """
 
-
-
 if __name__ == '__main__':
+    start_time = time.time()
     #Recuperation des donnees
     viirs=pd.read_table('dataVIIRS/atlas/clair_nuage/cible_jour_clair.txt',sep=',')
-    indexprint()
-    #drawhist(viirs, 'code')
+    indexprint()#affiche la liste descriptive du type des donees du fichier
+    #drawhist(viirs,'code')
     #viirs=modif_code_nuage(viirs)
     
     viirs_data,tm,dataset= model_tri_clair_simple_jour(viirs)
     
-    
-    X_train,X_test,Y_train,Y_test,X_lon,X_lat,X_tm=creation_TrainTest(viirs_data,tm, 0.8)
+    X_train,X_test,Y_train,Y_test,X_lon,X_lat,X_tm=creation_TrainTest(viirs_data,tm,0.8)
     
     print 'creation de l estimateur'
     estimateur=RandomForestClassifier(n_estimators=2500,min_samples_leaf=25,n_jobs=-1)
-                    
+    
     print 'calcul fit'
     estimateur.fit(X_train, Y_train)
     
-    test=estimateur.predict_proba(X_test)
+    #test=estimateur.predict_proba(X_test)
     
     y_true, y_pred = Y_test, estimateur.predict(X_test)
     
-    
     printimportance(dataset, estimateur)
-               
+    
+
+    print Y_test.value_counts()
+    
+    
     print '\nmeilleur estimateur: \n'
     print confusion_matrix(y_true, y_pred)
     compute_score(estimateur, X_train, Y_train)
@@ -516,9 +510,11 @@ if __name__ == '__main__':
     print '\nRapport \n'
     print classification_report(y_true, y_pred)
     
-    
-    print 'wololo'
-    
+
+    tps_final=round(time.time()-start_time,2)
+    print("--- %s seconds ---" % tps_final)
+    print '--------------------end--------------------'
+    #print test
     
     
     
