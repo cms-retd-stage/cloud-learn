@@ -5,7 +5,7 @@ Created on 13 juin 2016
 @author: delatailler; almeidamanceroi
 '''
 
-
+import cPickle
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,9 +31,11 @@ from skimage.filters.rank.generic import equalize
 from pointe_cibles import drawMap
 from pointe_cibles import drawhist
 from pointe_cibles import printimportance
+from pointe_cibles import printimportance2
 from pointe_cibles import draw3D
 
 from gestion_fichier import indexprint
+
 """
 ---------------------------------------------------------------------------------------------
 """
@@ -53,7 +55,7 @@ def modif_code_nuage(viirs):
 def compute_score(estimateur,X,Y):
     xval=cross_val_score(estimateur,X,Y,cv=10,n_jobs=-1)
     score=np.mean(xval)
-    print 'score cross-corre:', score
+    print 'score cross-validation:', score
     return score
 
 
@@ -459,7 +461,6 @@ def model_tri_clair_simple_nuit(X):
     
     X['SP15_12']=100*(X.Obs_108-X.Obs_37)/(X.Obs_108+X.Obs_37)
     
-    
     #X.plot(kind='scatter',x='Obs_108',y='SP4_7',c='code')
     #radviz(X[['pix_tm','SP4_7','Obs_108','code']], 'code')
     #draw3D(viirs=X, xs='pix_tm', ys='sst_clim', zs='Obs_87', code='code')
@@ -470,53 +471,138 @@ def model_tri_clair_simple_nuit(X):
     data[['pix_lat','pix_lon','code']]=X[['pix_lat','pix_lon','code']]
     return data,tm,dataset
 
+def model_nouvelles_cibles_clair_simple_nuit(X):
+    tm=X['pix_tm']
+    X['SP14_13']=100*(X.Obs_87-X.Obs_40)/(X.Obs_87+X.Obs_40)
+    X['SP14_12']=100*(X.Obs_87-X.Obs_37)/(X.Obs_87+X.Obs_37)
+    X['SP13_12']=100*(X.Obs_40-X.Obs_37)/(X.Obs_40+X.Obs_37)
+    X['SP15_16']=100*(X.Obs_108-X.Obs_120)/(X.Obs_108+X.Obs_120)
+    X['SP15_14']=100*(X.Obs_108-X.Obs_87)/(X.Obs_108+X.Obs_87)
+    X['SP15_12']=100*(X.Obs_108-X.Obs_37)/(X.Obs_108+X.Obs_37)
+    dataset=['pix_tm','SP14_12','SP13_12','SP15_14','SP15_12','SP15_16','SP14_13','alt_NWP','ps_prev','ts_prev','T500','albedo_clim','sst', 'var_37', 'var_40', 'var_87', 'var_108', 'var_120']
+    #dataset=['pix_tm','Obs_108','Obs_37','SP14_12','SP13_12','SP15_14','SP15_12','Obs_40','Obs_87','Obs_120']
+    #Obs_04,Obs_05,Obs_06,Obs_08,Obs_13,Obs_16,Obs_22,Obs_37,Obs_40,Obs_87,Obs_108,Obs_120,code,texte,alt_NWP,ps_prev,ts_prev,t2m_prev,cwv_prev,T500,T700,T850,sst_clim,sstmoy_clim,albedo_clim,sst,var_04,var_05,var_06,var_08,var_13,var_16,var_22,var_37,var_40,var_87,var_108,var_120
+    
+    data=X[dataset]
+    data[['pix_lat','pix_lon','code']]=X[['pix_lat','pix_lon','code']]
+    return data,tm,dataset
+
+
+
+def model_simple_cible_nouveau(X):
+    tm=X['pix_tm']
+    X['SP14_13']=100*(X.Obs_87-X.Obs_40)/(X.Obs_87+X.Obs_40)
+    #X['SP14_12']=100*(X.Obs_87-X.Obs_37)/(X.Obs_87+X.Obs_37)
+    X['SP13_12']=100*(X.Obs_40-X.Obs_37)/(X.Obs_40+X.Obs_37)
+    X['SP15_16']=100*(X.Obs_108-X.Obs_120)/(X.Obs_108+X.Obs_120)
+    X['SP15_14']=100*(X.Obs_108-X.Obs_87)/(X.Obs_108+X.Obs_87)
+    X['SP15_12']=100*(X.Obs_108-X.Obs_37)/(X.Obs_108+X.Obs_37)
+    
+    X['B14_15']=X.Obs_87/X.Obs_108 #NOAA beta
+    X['B16_15']=X.Obs_120/X.Obs_108 #NOAA beta
+    #X['B13_15']=X.Obs_40/X.Obs_108 #NOAA beta
+    X['B7_5']=X.Obs_08/X.Obs_06
+    #X['SP4_7']=(X.Obs_04-X.Obs_08)/(X.Obs_04+X.Obs_08)
+    X['SP16_12']=(X.Obs_120-X.Obs_37)/(X.Obs_120+X.Obs_37)
+    X['SP4_10']=(X.Obs_05-X.Obs_16)/(X.Obs_05+X.Obs_16)
+    
+    X['SP14_15']=X.Obs_87-X.Obs_108
+    #X['TRI14_15_16']=(X.Obs_87-X.Obs_108)*(X.Obs_108-X.Obs_120)
+    X['test6']=np.cos(X['pix_sunzen']*math.pi/180)
+    X['B15_12']=X.Obs_108/X.Obs_37
+    X['test3']=np.maximum(X.Obs_120-X.Obs_108 ,np.maximum( X.Obs_120-X.Obs_37,X.Obs_108-X.Obs_37))
+    X['test4']=(X.Obs_108-X.Obs_37)*(X.Obs_108-X.Obs_37)
+    #X['bleu']=X['Obs_22']+X['Obs_13']
+    X['SP5_10']=(X.Obs_06-X.Obs_16)/(X.Obs_06+X.Obs_16) #classif neige
+    X['SP5_11']=(X.Obs_06-X.Obs_22)/(X.Obs_06+X.Obs_22) #classif neige mieux
+    X['SP10_11']=(X.Obs_16-X.Obs_22)/(X.Obs_16+X.Obs_22)
+    X['BW']=(X.Obs_04+X.Obs_05+X.Obs_06)/(3*255)
+    X['test2b']=X.Obs_108*X.Obs_108
+    X['test3b']=X.Obs_22*X.Obs_22
+    X['test4b']=X.Obs_87*X.Obs_87
+    X['D_Obs_87_120']=X.Obs_87-X.Obs_120
+    X['D_Obs_108_120']=X.Obs_108-X.Obs_120
+    X['D_Obs87_108']=X.Obs_87-X.Obs_108
+    X['D_Obs_13_37']=X.Obs_13-X.Obs_37
+    X['D_Obs_06_16']=X.Obs_06-X.Obs_16
+    
+    dataset=['SP13_12','SP14_13','BW','D_Obs_87_120','D_Obs_108_120','D_Obs87_108','D_Obs_13_37','D_Obs_06_16','SP5_11','SP5_10','test4b','test3b','test2b','test4','test3','B15_12','test6','SP14_15','SP4_10','SP16_12','SP10_11','B7_5','B16_15','B14_15','SP15_12','SP15_14','SP15_16','pix_tm','pix_sunzen','Obs_05','Obs_06','Obs_13','Obs_16','Obs_22','Obs_37','Obs_40','Obs_87','Obs_108','Obs_120','alt_NWP','ts_prev','cwv_prev','sst','var_04','var_05','var_06','var_08','var_16','var_22','var_37','var_87','var_108','var_120']
+    #dataset=['pix_sunzen','pix_alt','pix_tm','Obs_04','Obs_05','Obs_06','Obs_08','Obs_13','Obs_16','Obs_22','Obs_37','Obs_40','Obs_87','Obs_108','Obs_120','alt_NWP','ts_prev','t2m_prev','cwv_prev','T700','T850','sst_clim','sstmoy_clim','sst','var_04','var_05','var_06','var_08','var_13','var_16','var_22','var_37','var_87','var_108','var_120']
+    #'pix_satzen','pix_sunzen','pix_satazi','pix_sunazi','pix_alt','pix_tm','pix_daytime','Obs_04','Obs_05','Obs_06','Obs_08','Obs_13','Obs_16','Obs_22','Obs_37','Obs_40','Obs_87','Obs_108','Obs_120','code','texte','alt_NWP','ps_prev','ts_prev','t2m_prev','cwv_prev','T500','T700','T850','sst_clim','sstmoy_clim','albedo_clim','sst','var_04','var_05','var_06','var_08','var_13','var_16','var_22','var_37','var_40','var_87','var_108','var_120'
+    
+    data=X[dataset]
+    data[['pix_lat','pix_lon','code']]=X[['pix_lat','pix_lon','code']]
+    return data,tm,dataset
+
+
 """
------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
 """
 
 if __name__ == '__main__':
     start_time = time.time()
     #Recuperation des donnees
-    viirs=pd.read_table('dataVIIRS/atlas/clair_nuage/cible_jour_clair.txt',sep=',')
-    indexprint()#affiche la liste descriptive du type des donees du fichier
-    #drawhist(viirs,'code')
-    #viirs=modif_code_nuage(viirs)
     
-    viirs_data,tm,dataset= model_tri_clair_simple_jour(viirs)
+    viirs=pd.read_table('Nouvelles_cibles_a_utiliser/simple_cible_clear_night_pascale_full.txt',sep=',')
+    #viirs=pd.read_table('Nouvelles_cibles_a_utiliser/simple_cible_nouveau.txt',sep=',')
     
+    print list(viirs.columns.values)
+    print '\n'
+    #print viirs
+    
+    viirs_data,tm,dataset=model_nouvelles_cibles_clair_simple_nuit(viirs)
+    #viirs_data,tm,dataset= model_simple_cible_nouveau(viirs)
+    print dataset
+    
+    tps_estimateur_av=time.time()
     X_train,X_test,Y_train,Y_test,X_lon,X_lat,X_tm=creation_TrainTest(viirs_data,tm,0.8)
-    
+      
     print 'creation de l estimateur'
-    estimateur=RandomForestClassifier(n_estimators=2500,min_samples_leaf=25,n_jobs=-1)
+    estimateur=RandomForestClassifier(n_estimators=2500,min_samples_leaf=5,n_jobs=-1)
     
+     
     print 'calcul fit'
     estimateur.fit(X_train, Y_train)
     
-    #test=estimateur.predict_proba(X_test)
+    tps_estimateur=time.time()
+    tps_est=tps_estimateur-tps_estimateur_av
+    print("---Durée de créatioin et entrainement de l'estimateur: %s---" % tps_est)
     
     y_true, y_pred = Y_test, estimateur.predict(X_test)
     
-    printimportance(dataset, estimateur)
     
-
+    printimportance2(dataset, estimateur) 
+     
+    print 'codes des cibles et nombre d apparitions dans le test\n'
     print Y_test.value_counts()
     
     
-    print '\nmeilleur estimateur: \n'
+    print '\nmatrice de confusion: \n'
     print confusion_matrix(y_true, y_pred)
-    compute_score(estimateur, X_train, Y_train)
-    print estimateur
     
+    print '\n'
+    compute_score(estimateur, X_train, Y_train)
+    print '\n'
+    print estimateur
+     
     print '\nRapport \n'
     print classification_report(y_true, y_pred)
+      
     
-
     tps_final=round(time.time()-start_time,2)
-    print("--- %s seconds ---" % tps_final)
+    print("--- %s seconds en total---" % tps_final)
+     
+    
+    # save the classifier
+    with open('my_dumped_classifier_nuit_clair_simple3.pkl', 'wb') as fid:
+        cPickle.dump(estimateur, fid)    
+
+#     # load it again
+#     with open('my_dumped_classifier.pkl', 'rb') as fid:
+#     gnb_loaded = cPickle.load(fid) 
+     
+     
     print '--------------------end--------------------'
-    #print test
-    
-    
     
     
     """

@@ -170,6 +170,18 @@ def printimportance(data,estimateur):
     print '\n'
     return 1
 
+def printimportance2(data,estimateur):
+    '''
+    Affiche l'importance des entrees pour un random forest (en ordre)
+    '''
+    imp=estimateur.feature_importances_
+    ind_imp_sort=list(reversed(np.argsort(imp)))
+    print 'Importances:'
+    for i in ind_imp_sort:
+        print data[i],'  ',imp[i]
+    print '\n'
+    return 1
+
 
 def draw3D(viirs,xs,ys,zs,code):
     '''
