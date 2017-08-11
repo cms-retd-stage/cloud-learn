@@ -502,8 +502,8 @@ def model_cluster_jour(X):
  
     dataset=['Obs_04','Obs_05','Obs_06','Obs_08','Obs_13','Obs_16','Obs_22','Obs_37','Obs_40','Obs_87','Obs_108','Obs_120']
     
-    sds=StandardScaler()
-    X[dataset]=sds.fit_transform(X[dataset])
+    sds=StandardScaler()                    #
+    X[dataset]=sds.fit_transform(X[dataset])# ceci sert a mettre les variables a la meme echelle
     
     data=X[dataset]
     return data
