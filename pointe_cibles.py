@@ -221,12 +221,21 @@ def ViirsShow(viirs,canal):
 
 if __name__ == '__main__':
     #fic1 = "/rd/merzhin/safnwp/stage/romuald/dataset/JourSepa.txt"
-    fic1 = "dataVIIRS/atlas/sepa/cible_jour_modifiee_frac.txt"
+#     fic1 = "dataVIIRS/atlas/sepa/cible_jour_modifiee_frac.txt"
+#     viirs = pd.read_csv(fic1, sep=',')
+#     
+#     neige=viirs['code']==1
+#     
+#     drawhist(viirs[neige], 'Obs_108', 'terre')
+
+
+    
+    fic1 = "/home/mcms/almeidamanceroi/workspace/workspace/VIIRS/Nouvelles_cibles_a_utiliser/simple_cible_nouveau_modif_sst.txt"
     viirs = pd.read_csv(fic1, sep=',')
     
-    neige=viirs['code']==1
     
-    drawhist(viirs[neige], 'Obs_108', 'terre')
+    drawhist(viirs, 'code', 'codes parmi les cibles')
+    
     
     
     '''

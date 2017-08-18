@@ -526,7 +526,13 @@ def model_simple_cible_nouveau(X):
     X['D_Obs_13_37']=X.Obs_13-X.Obs_37
     X['D_Obs_06_16']=X.Obs_06-X.Obs_16
     
-    dataset=['SP13_12','BW','SP14_13','D_Obs_87_120','D_Obs_108_120','D_Obs87_108','D_Obs_13_37','D_Obs_06_16','SP5_11','SP5_10','test4b','test3b','test2b','test4','test3','B15_12','test6','SP14_15','SP4_10','SP16_12','SP10_11','B7_5','B16_15','B14_15','SP15_12','SP15_14','SP15_16','pix_tm','pix_sunzen','Obs_05','Obs_06','Obs_13','Obs_16','Obs_22','Obs_37','Obs_40','Obs_87','Obs_108','Obs_120','alt_NWP','ts_prev','cwv_prev','maxsst','minsst','ansst','sst','var_04','var_05','var_06','var_08','var_13','var_16','var_22','var_37','var_40','var_87','var_108','var_120','glace']
+    dataset=['SP13_12','BW','SP14_13','D_Obs_87_120','D_Obs_108_120','D_Obs87_108','D_Obs_13_37',
+             'D_Obs_06_16','SP5_11','SP5_10','test4b','test3b','test2b','test4','test3','B15_12',
+             'test6','SP14_15','SP4_10','SP16_12','SP10_11','B7_5','B16_15','B14_15','SP15_12','SP15_14',
+             'SP15_16','pix_tm','pix_sunzen','Obs_05','Obs_06','Obs_13','Obs_16','Obs_22','Obs_37',
+             'Obs_40','Obs_87','Obs_108','Obs_120','alt_NWP','ts_prev','cwv_prev','maxsst','minsst','ansst',
+             'sst','var_04','var_05','var_06','var_08','var_13','var_16','var_22','var_37','var_40','var_87',
+             'var_108','var_120','glace']
     #dataset=['pix_sunzen','pix_alt','pix_tm','Obs_04','Obs_05','Obs_06','Obs_08','Obs_13','Obs_16','Obs_22','Obs_37','Obs_40','Obs_87','Obs_108','Obs_120','alt_NWP','ts_prev','t2m_prev','cwv_prev','T700','T850','sst_clim','sstmoy_clim','sst','var_04','var_05','var_06','var_08','var_13','var_16','var_22','var_37','var_87','var_108','var_120']
     
     data=X[dataset]
@@ -537,46 +543,46 @@ def model_simple_cible_nouveau(X):
 
 def model_test_pour_granule(X):
     tm=X['pix_tm']
-    #X['SP14_13']=100*(X.Obs_87-X.Obs_40)/(X.Obs_87+X.Obs_40)
-    #X['SP13_12']=100*(X.Obs_40-X.Obs_37)/(X.Obs_40+X.Obs_37)
+    X['SP14_13']=100*(X.Obs_87-X.Obs_40)/(X.Obs_87+X.Obs_40)
+    X['SP13_12']=100*(X.Obs_40-X.Obs_37)/(X.Obs_40+X.Obs_37)
     X['SP15_16']=100*(X.Obs_108-X.Obs_120)/(X.Obs_108+X.Obs_120)
-    #X['SP15_14']=100*(X.Obs_108-X.Obs_87)/(X.Obs_108+X.Obs_87)
+    X['SP15_14']=100*(X.Obs_108-X.Obs_87)/(X.Obs_108+X.Obs_87)
     X['SP15_12']=100*(X.Obs_108-X.Obs_37)/(X.Obs_108+X.Obs_37)
-    #X['B14_15']=X.Obs_87/X.Obs_108 #NOAA beta
+    X['B14_15']=X.Obs_87/X.Obs_108 #NOAA beta
     X['B16_15']=X.Obs_120/X.Obs_108 #NOAA beta
-    #X['B7_5']=X.Obs_08/X.Obs_06
-    #X['SP16_12']=(X.Obs_120-X.Obs_37)/(X.Obs_120+X.Obs_37)
+    X['B7_5']=X.Obs_08/X.Obs_06
+    X['SP16_12']=(X.Obs_120-X.Obs_37)/(X.Obs_120+X.Obs_37)
     X['SP4_10']=(X.Obs_05-X.Obs_16)/(X.Obs_05+X.Obs_16)
-    #X['SP14_15']=X.Obs_87-X.Obs_108
-    #X['test6']=np.cos(X['pix_sunzen']*math.pi/180)
+    X['SP14_15']=X.Obs_87-X.Obs_108
+    X['test6']=np.cos(X['pix_sunzen']*math.pi/180)
     X['B15_12']=X.Obs_108/X.Obs_37
     X['test3']=np.maximum(X.Obs_120-X.Obs_108 ,np.maximum( X.Obs_120-X.Obs_37,X.Obs_108-X.Obs_37))
-    #X['test4']=(X.Obs_108-X.Obs_37)*(X.Obs_108-X.Obs_37)
+    X['test4']=(X.Obs_108-X.Obs_37)*(X.Obs_108-X.Obs_37)
     X['SP5_10']=(X.Obs_06-X.Obs_16)/(X.Obs_06+X.Obs_16) #classif neige
     X['SP5_11']=(X.Obs_06-X.Obs_22)/(X.Obs_06+X.Obs_22) #classif neige mieux
-    #X['SP10_11']=(X.Obs_16-X.Obs_22)/(X.Obs_16+X.Obs_22)
-    #X['BW']=(X.Obs_04+X.Obs_05+X.Obs_06)/(3*255)
+    X['SP10_11']=(X.Obs_16-X.Obs_22)/(X.Obs_16+X.Obs_22)
+    X['BW']=(X.Obs_04+X.Obs_05+X.Obs_06)/(3*255)
     X['test2b']=X.Obs_108*X.Obs_108
     X['test3b']=X.Obs_22*X.Obs_22
     X['test4b']=X.Obs_87*X.Obs_87
     X['D_Obs_87_120']=X.Obs_87-X.Obs_120
     X['D_Obs_108_120']=X.Obs_108-X.Obs_120
-    #X['D_Obs87_108']=X.Obs_87-X.Obs_108
+    X['D_Obs87_108']=X.Obs_87-X.Obs_108
     X['D_Obs_13_37']=X.Obs_13-X.Obs_37
     X['D_Obs_06_16']=X.Obs_06-X.Obs_16
     
-    dataset=['Obs_40','Obs_108','Obs_87','Obs_120',
-             'pix_sunzen','pix_alt','pix_tm','sst',
-             'SP15_16','SP15_12','B16_15','SP4_10',
-             'B15_12','test3','SP5_10','SP5_11','test2b','test3b','test4b','D_Obs_87_120',
-             'D_Obs_108_120','D_Obs_13_37','D_Obs_06_16']  
+    dataset=['Obs_06', 'Obs_05', 'Obs_08', 'Obs_04', 'Obs_13', 'Obs_22', 'Obs_16', 'Obs_40', 'Obs_37',
+              'Obs_108', 'Obs_87', 'Obs_120', 'pix_satzen', 'pix_sunzen', 'pix_satazi', 'pix_sunazi',
+               'pix_alt', 'pix_tm', 'pix_daytime', 'SP14_13', 'SP13_12', 'SP15_16', 'SP15_14',
+                'SP15_12', 'B14_15', 'B16_15', 'B7_5', 'SP16_12', 'SP4_10', 'SP14_15', 'test6', 'B15_12',
+                 'test3', 'test4', 'SP5_10', 'SP5_11', 'SP10_11', 'BW', 'test2b', 'test3b', 'test4b',
+                  'D_Obs_87_120', 'D_Obs_108_120', 'D_Obs87_108', 'D_Obs_13_37', 'D_Obs_06_16','var_05',
+                  'var_06','var_08','var_13','var_16','var_22','var_37','var_40','var_87','var_108','var_120']  
     data=X[dataset]
     data[['pix_lat','pix_lon','code']]=X[['pix_lat','pix_lon','code']]
     return data,tm,dataset
 
-'Paramètres du granule:'
-"Obs_06,Obs_05,Obs_08,Obs_04,Obs_13,Obs_22,Obs_16,Obs_40,Obs_37,Obs_108,Obs_87,Obs_120,"
-"pix_lon,pix_lat,pix_satzen,pix_sunzen,pix_satazi,pix_sunazi,pix_alt,pix_tm,pix_daytime,sst"
+
 
 
 """
@@ -603,7 +609,7 @@ if __name__ == '__main__':
     X_train,X_test,Y_train,Y_test,X_lon,X_lat,X_tm=creation_TrainTest(viirs_data,tm,0.8)
     
     print 'creation de l estimateur'
-    estimateur=RandomForestClassifier(n_estimators=2500,min_samples_leaf=5,n_jobs=-1,verbose=2)
+    estimateur=RandomForestClassifier(n_estimators=2500,min_samples_leaf=5,n_jobs=-1)
     
      
     print 'calcul fit'
@@ -639,7 +645,7 @@ if __name__ == '__main__':
      
     
     # save the classifier
-    with open('/home/mcms/almeidamanceroi/workspace/workspace/VIIRS/sauvegarde_classifiers/my_dumped_classifier_pour_granule3.pkl', 'wb') as fid:
+    with open('/home/mcms/almeidamanceroi/workspace/workspace/VIIRS/sauvegarde_classifiers/my_dumped_classifier_pour_granule_vars.pkl', 'wb') as fid:
         cPickle.dump(estimateur, fid)    
 
 #     # load it again
